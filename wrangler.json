@@ -4,7 +4,6 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "branch-worker",
 	"main": "src/index.js",
 	"compatibility_date": "2025-01-29",
@@ -13,15 +12,15 @@
 	},
 	"routes": [
 		{
-			"pattern": "www.thegreenwebfoundation.org/tools/grid-aware-websites/",
-			"zone_name": "thegreenwebfoundation.org"
+			"pattern": "branch-staging.climateaction.tech/*",
+			"zone_name": "climateaction.tech"
 		}
 	],
 	"kv_namespaces": [
 		{
 			"binding": "GAW_DATA_KV",
-			"id": "590f78051f084c70a7315f1fafac986a"
-		}
+			"id": "ca924e15062e4658874134b121571dc7"
+		  }
 	]
 	/**
 	 * Smart Placement
