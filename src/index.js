@@ -11,6 +11,168 @@ const lowCarbonBreakpoints = {
 	'high': 100,
 }
 
+let intensity = 'unknown';
+let logo = 'unknown';
+
+let modifyHTML = new HTMLRewriter();
+
+function createSelect(selectedIntensity) {
+	const options = ['live', 'high', 'moderate', 'low'];
+	let selectOptions = '<select id="carbon-switcher-toggle" class="select-list__linked select-css">';
+	options.forEach(option => {
+		if (option === selectedIntensity) {
+			selectOptions += `<option value="${option}" selected>${option}</option>`;
+		} else {
+			selectOptions += `<option value="${option}">${option}</option>`;
+		}
+	});
+
+	selectOptions += '</select>';
+
+	return selectOptions;
+}
+
+async function gridIntensityChanges(response, powerPercentage, selectedIntensity = 'live') {
+	console.log('Grid intensity:', powerPercentage);
+	console.log('Selected intensity:', selectedIntensity);
+
+	if ((powerPercentage && powerPercentage < lowCarbonBreakpoints.low )|| selectedIntensity === 'high') {
+		intensity = 'high';
+		logo = 'orange';
+		modifyHTML = modifyHTML.on('html', {
+			element(element) {
+				const style = element.getAttribute('style') || '';
+				element.setAttribute('style', style + '--bg-colour: #FFBF43; --hl-colour: #472E00; --body-colour: #1E1E1E;');
+			},
+		});
+
+		// Regular images, not in gallery
+		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon), .entry-content figure.wp-block-image:not(.no-carbon), .entry-content figure.wp-block-gallery figure:not(.no-carbon)', {
+			element(element) {
+				element.setAttribute('style', 'position: relative;');
+			}
+		});
+		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
+			element(element) {
+				const height = element.getAttribute('height');
+				const width = element.getAttribute('width');
+
+				element.after(`<img src="https://branch.climateaction.tech//wp-content/themes/branch-theme/images/solid-placeholder.php?bg=ffdd9c&w=${width}&h=${height}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" height="${height}" width="${width}" />`, { html: true });
+			}
+		});
+
+		// Gallery images
+		// modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon), .entry-content figure.wp-block-image:not(.no-carbon), .entry-content figure.wp-block-gallery figure:not(.no-carbon)', {
+
+
+	} else if ((powerPercentage && powerPercentage < lowCarbonBreakpoints.medium) || selectedIntensity === 'moderate') {
+		intensity = 'medium';
+		logo = 'blue';
+		const re = /(\d{4})\/(\d{2})\//gi;
+		modifyHTML = modifyHTML.on('html', {
+			element(element) {
+				const style = element.getAttribute('style') || '';
+				element.setAttribute('style', style + '--bg-colour: #87FEFF; --hl-colour: #00535C; --body-colour: #1E1E1E;');
+			},
+		});
+
+		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
+			element(element) {
+				const src = element.getAttribute('src');
+				src.replace(re, "$1/$2/low-res/");
+				const srcset = element.getAttribute('srcset');
+				srcset.replaceAll(re, "$1/$2/low-res/");
+				const style = element.getAttribute('style') || '';
+				element.setAttribute('style', style + 'display: initial !important;');
+			}
+		});
+
+		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) picture source, .entry-content figure.wp-block-image:not(.no-carbon) picture source, .entry-content figure.wp-block-gallery figure:not(.no-carbon) picture source', {
+			element(element) {
+				const srcset = element.getAttribute('srcset');
+				srcset.replaceAll(re, "$1/$2/low-res/");
+			}
+		});
+	} else if ((powerPercentage && powerPercentage <= lowCarbonBreakpoints.high) || selectedIntensity === 'low') {
+		intensity = 'low';
+		logo = 'green';
+
+		modifyHTML = modifyHTML.on('html', {
+			element(element) {
+				const style = element.getAttribute('style') || '';
+				element.setAttribute('style', style + '--bg-colour: #C8FF63; --hl-colour: #005C20; --body-colour: #1E1E1E;');
+			},
+		});
+
+		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
+			element(element) {
+				const style = element.getAttribute('style') || '';
+				element.setAttribute('style', style + 'display: initial !important;');
+			}
+		});
+
+	} else if (powerPercentage === 'unknown' && selectedIntensity === 'live') {
+		intensity = 'unknown';
+	}
+
+	console.log('Logo:', logo);
+
+	modifyHTML = modifyHTML.on('.logo img', {
+		element(element) {
+			element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_' + logo + '-02.svg');
+		}
+	})
+
+
+	modifyHTML = modifyHTML.on('body', {
+		element(element) {
+			const classes = element.getAttribute('class') || '';
+			element.setAttribute('class', classes + ' ' + intensity + '-grid-intensity');
+		},
+	});
+
+	modifyHTML = modifyHTML.on('.intensity', {
+		element(element) {
+			element.setInnerContent(intensity);
+		}
+	});
+
+	modifyHTML = modifyHTML.on('#intensity-toggle-js', {
+		element(element) {
+			// element.before(`<script>function setWithExpiry(key,value,ttl){const now=new Date();now.setTime(now.getTime()+ttl);document.cookie=key+"="+value+";expires="+now.toUTCString()+";path=/"}function getWithExpiry(key){return}</script>`, { html: true });
+			element.remove();
+		}
+	});
+
+	modifyHTML = modifyHTML.on('#carbon-switcher-toggle', {
+		element(element) {
+			element.replace(createSelect(selectedIntensity), { html: true });
+		}
+	});
+
+	modifyHTML = modifyHTML.on('body', {
+		element(element) {
+			element.append(`<script>
+				function setWithExpiry(key, value) {
+					document.cookie = key + "=" + value + ";path=/";
+				}
+
+				document.getElementById('carbon-switcher-toggle').addEventListener('change', function(e) {
+					setWithExpiry('selected-intensity', e.target.value);
+					location.reload();
+				});</script>`, { html: true });
+		}
+	});
+
+	return new Response(modifyHTML.transform(response).body, {
+		...response,
+		headers: {
+			...response.headers,
+			'Content-Type': 'text/html;charset=UTF-8',
+		},
+	});
+}
+
 export default {
 	// First fetch the request
 	async fetch(request, env, ctx) {
@@ -36,6 +198,23 @@ export default {
 				return new Response(response.body, {
 					...response,
 				});
+			}
+
+			if (cookie && cookie.includes('selected-intensity=low')) {
+				console.log('Grid-aware feature is forced to low');
+				return await gridIntensityChanges(response, null, 'low');
+			}
+			if (cookie && cookie.includes('selected-intensity=moderate')) {
+				console.log('Grid-aware feature is forced to moderate');
+				return await gridIntensityChanges(response, null, 'moderate');
+			}
+			if (cookie && cookie.includes('selected-intensity=high')) {
+				console.log('Grid-aware feature is forced to high');
+				return await gridIntensityChanges(response, null, 'high');
+			}
+			if (cookie && cookie.includes('selected-intensity=live')) {
+				console.log('Grid-aware feature is forced to live');
+				return await gridIntensityChanges(response, null, 'live');
 			}
 
 
@@ -87,104 +266,14 @@ export default {
 				gridData = await JSON.parse(gridData);
 			}
 
-			let modifyHTML = new HTMLRewriter()
 
+
+			console.log('Using grid data for country', country);
 			// Check if the grid intensity is above the threshold
 			const powerPercentage = gridData.data.lowCarbonPercentage;
-			let intensity = 'unknown';
-			let logo = 'unknown';
-			if (powerPercentage < thresholds.low) {
-				intensity = 'low';
-				logo = 'green';
-				modifyHTML = modifyHTML.on('html', {
-					element(element) {
-						const style = element.getAttribute('style') || '';
-						element.setAttribute('style', style + '--bg-colour: #C8FF63; --hl-colour: #005C20; --body-colour: #1E1E1E;');
-					},
-				});
-
-				modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
-					element(element) {
-						const style = element.getAttribute('style') || '';
-						element.setAttribute('style', style + 'display: initial !important;');
-					}
-				});
-			} else if (powerPercentage < thresholds.medium) {
-				intensity = 'medium';
-				logo = 'blue';
-				const re = /(\d{4})\/(\d{2})\//gi;
-				modifyHTML = modifyHTML.on('html', {
-					element(element) {
-						const style = element.getAttribute('style') || '';
-						element.setAttribute('style', style + '--bg-colour: #87FEFF; --hl-colour: #00535C; --body-colour: #1E1E1E;');
-					},
-				});
-
-				modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
-					element(element) {
-						const src = element.getAttribute('src');
-						src.replace(re, "$1/$2/low-res/");
-						const srcset = element.getAttribute('srcset');
-						srcset.replaceAll(re, "$1/$2/low-res/");
-						const style = element.getAttribute('style') || '';
-						element.setAttribute('style', style + 'display: initial !important;');
-					}
-				});
-
-				modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) picture source, .entry-content figure.wp-block-image:not(.no-carbon) picture source, .entry-content figure.wp-block-gallery figure:not(.no-carbon) picture source', {
-					element(element) {
-						const srcset = element.getAttribute('srcset');
-						srcset.replaceAll(re, "$1/$2/low-res/");
-					}
-				});
-			} else if (powerPercentage <= thresholds.high) {
-				intensity = 'high';
-				logo = 'orange';
-				modifyHTML = modifyHTML.on('html', {
-					element(element) {
-						const style = element.getAttribute('style') || '';
-						element.setAttribute('style', style + '--bg-colour: #FFBF43; --hl-colour: #472E00; --body-colour: #1E1E1E;');
-					},
-				});
-
-
-			} else {
-				intensity = 'unknown';
-			}
-
-			modifyHTML = modifyHTML.on('.logo img', {
-				element(element) {
-					element.setAttribute('src', '/wp-content/themes/branch-theme/images/branch_' + logo + '-02.svg');
-				}
-			})
-
-
-			modifyHTML = modifyHTML.on('body', {
-				element(element) {
-					const classes = element.getAttribute('class') || '';
-					element.setAttribute('class', classes + ' ' + intensity + '-grid-intensity');
-				},
-			});
-
 
 				// Transform the response using the HTMLRewriter API, and set appropriate headers.
-				let modifiedResponse = new Response(modifyHTML.transform(response).body, {
-					...response,
-					headers: {
-						...response.headers,
-						'Content-Type': 'text/html;charset=UTF-8',
-					},
-				});
-
-				return modifiedResponse;
-
-			// // If the grid aware flag is not triggered, then we'll return the original HTML page to the user.
-			// return new Response(response.body, {
-			// 	...response,
-			// 	headers: {
-			// 		...response.headers,
-			// 	},
-			// });
+				return await gridIntensityChanges(response, powerPercentage);
 		} catch (e) {
 
 			// If there's an error getting data, return the web page without any modifications
