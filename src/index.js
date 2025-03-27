@@ -1,7 +1,11 @@
 import { PowerBreakdown } from '@greenweb/grid-aware-websites';
 import { getLocation, saveDataToKv, fetchDataFromKv } from '@greenweb/gaw-plugin-cloudflare-workers';
 
-const thresholds = {
+// TODO: Grid-aware behaviour for gallery images
+
+// What are the thresholds for the grid power breakdown?
+// We;re using the low-carbon percentage, so the higher the percentage, the cleaner the grid.
+const lowCarbonBreakpoints = {
 	'low': 50,
 	'medium': 70,
 	'high': 100,
