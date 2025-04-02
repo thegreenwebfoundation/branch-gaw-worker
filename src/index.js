@@ -224,13 +224,11 @@ export default {
 				// console.log('Grid-aware feature is forced to low');
 				await setLowTheme(modifyHTML);
 				return await returnPage(response, modifyHTML, 'low');
-			}
-			if (cookie && cookie.includes('selected-intensity=moderate')) {
+			} else if (cookie && cookie.includes('selected-intensity=moderate')) {
 				// console.log('Grid-aware feature is forced to moderate');
 				await setMediumTheme(modifyHTML);
 				return await returnPage(response, modifyHTML, 'moderate');
-			}
-			if (cookie && cookie.includes('selected-intensity=high')) {
+			} else if (cookie && cookie.includes('selected-intensity=high')) {
 				// console.log('Grid-aware feature is forced to high');
 				await setHighTheme(modifyHTML);
 				return await returnPage(response, modifyHTML, 'high');
