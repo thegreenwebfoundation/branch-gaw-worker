@@ -18,7 +18,7 @@ let modifyHTML = new HTMLRewriter();
 
 function createSelect(selectedIntensity) {
 	const options = ['live', 'high', 'moderate', 'low'];
-	let selectOptions = '<select id="carbon-switcher-toggle" class="select-list__linked select-css">';
+	let selectOptions = '<select id="carbon-switcher-toggle" class="select-list__linked select-css" style="text-decoration: underline; text-underline-offset: 2px;">';
 	options.forEach(option => {
 		if (option === selectedIntensity) {
 			selectOptions += `<option value="${option}" selected>${option}</option>`;
