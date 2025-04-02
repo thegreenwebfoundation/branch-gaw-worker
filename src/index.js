@@ -14,8 +14,6 @@ const lowCarbonBreakpoints = {
 let intensity = 'unknown';
 let logo = 'unknown';
 
-let modifyHTML = new HTMLRewriter();
-
 function createSelect(selectedIntensity) {
 	const options = ['live', 'high', 'moderate', 'low'];
 	let selectOptions = '<select id="carbon-switcher-toggle" class="select-list__linked select-css" style="text-decoration: underline; text-underline-offset: 2px;">';
@@ -32,11 +30,7 @@ function createSelect(selectedIntensity) {
 	return selectOptions;
 }
 
-async function gridIntensityChanges(response, powerPercentage, selectedIntensity = 'live') {
-	console.log('Grid intensity:', powerPercentage);
-	console.log('Selected intensity:', selectedIntensity);
-
-	if ((powerPercentage && powerPercentage < lowCarbonBreakpoints.low )|| selectedIntensity === 'high') {
+async function setHighTheme(modifyHTML) {
 		intensity = 'high';
 		logo = 'orange';
 		modifyHTML = modifyHTML.on('html', {
@@ -83,8 +77,11 @@ async function gridIntensityChanges(response, powerPercentage, selectedIntensity
 		// https://branch-staging.climateaction.tech/wp-content/uploads/2024/04/xWholegrain-Digital-logo.png.pagespeed.ic.Cot5LJTbQ2.png
 		//
 
-	} else if ((powerPercentage && powerPercentage < lowCarbonBreakpoints.medium) || selectedIntensity === 'moderate') {
-		intensity = 'medium';
+		return modifyHTML;
+}
+
+async function setMediumTheme(modifyHTML) {
+	intensity = 'medium';
 		logo = 'blue';
 		const re = /(\d{4})\/(\d{2})\//gi;
 		modifyHTML = modifyHTML.on('html', {
@@ -111,8 +108,12 @@ async function gridIntensityChanges(response, powerPercentage, selectedIntensity
 				srcset.replaceAll(re, "$1/$2/low-res/");
 			}
 		});
-	} else if ((powerPercentage && powerPercentage <= lowCarbonBreakpoints.high) || selectedIntensity === 'low') {
-		intensity = 'low';
+
+		return modifyHTML;
+}
+
+async function setLowTheme(modifyHTML) {
+	intensity = 'low';
 		logo = 'green';
 
 		modifyHTML = modifyHTML.on('html', {
@@ -129,12 +130,10 @@ async function gridIntensityChanges(response, powerPercentage, selectedIntensity
 			}
 		});
 
-	} else if (powerPercentage === 'unknown' && selectedIntensity === 'live') {
-		intensity = 'unknown';
-	}
+		return modifyHTML;
+}
 
-	console.log('Logo:', logo);
-
+async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 	modifyHTML = modifyHTML.on('.logo img', {
 		element(element) {
 			element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_' + logo + '-02.svg');
@@ -194,13 +193,14 @@ async function gridIntensityChanges(response, powerPercentage, selectedIntensity
 export default {
 	// First fetch the request
 	async fetch(request, env, ctx) {
+		const url = request.url;
 		const response = await fetch(request.url);
 		// Then check if the request content type is HTML.
 		const contentType = response.headers.get('content-type');
 
 		// If the content is not HTML, then return the response without any changes.
-		if (!contentType || !contentType.includes('text/html')) {
-			console.log('Content type is not HTML');
+		if (!contentType || !contentType.includes('text/html') || url.includes('/wp-content/') || url.includes('/wp-includes/') || url.includes('/wp-admin/') || url.includes('/wp-json/')) {
+			// console.log('Content type is not HTML');
 			return new Response(response.body, {
 				...response,
 			});
@@ -212,27 +212,28 @@ export default {
 			// This is useful for testing purposes. It can also be used to disable the feature for specific users.
 			const cookie = request.headers.get('cookie');
 			if (cookie && cookie.includes('gaw=false')) {
-				console.log('Grid-aware feature is disabled');
+				// console.log('Grid-aware feature is disabled');
 				return new Response(response.body, {
 					...response,
 				});
 			}
 
+			let modifyHTML = new HTMLRewriter();
+
 			if (cookie && cookie.includes('selected-intensity=low')) {
-				console.log('Grid-aware feature is forced to low');
-				return await gridIntensityChanges(response, null, 'low');
+				// console.log('Grid-aware feature is forced to low');
+				await setLowTheme(modifyHTML);
+				return await returnPage(response, modifyHTML, 'low');
 			}
 			if (cookie && cookie.includes('selected-intensity=moderate')) {
-				console.log('Grid-aware feature is forced to moderate');
-				return await gridIntensityChanges(response, null, 'moderate');
+				// console.log('Grid-aware feature is forced to moderate');
+				await setMediumTheme(modifyHTML);
+				return await returnPage(response, modifyHTML, 'moderate');
 			}
 			if (cookie && cookie.includes('selected-intensity=high')) {
-				console.log('Grid-aware feature is forced to high');
-				return await gridIntensityChanges(response, null, 'high');
-			}
-			if (cookie && cookie.includes('selected-intensity=live')) {
-				console.log('Grid-aware feature is forced to live');
-				return await gridIntensityChanges(response, null, 'live');
+				// console.log('Grid-aware feature is forced to high');
+				await setHighTheme(modifyHTML);
+				return await returnPage(response, modifyHTML, 'high');
 			}
 
 
@@ -242,7 +243,7 @@ export default {
 
 			// If the country data does not exist, then return the response without any changes.
 			if (!country) {
-				console.log('Country data does not exist');
+				// console.log('Country data does not exist');
 				return new Response(response.body, {
 					...response,
 				});
@@ -253,7 +254,7 @@ export default {
 
 			// If no cached data, fetch it using the PowerBreakdown class
 			if (!gridData) {
-				console.log('No cached data for country', country);
+				// console.log('No cached data for country', country);
 				const options = {
 					mode: 'low-carbon',
 					apiKey: env.EMAPS_API_KEY,
@@ -264,7 +265,7 @@ export default {
 
 				// If there's an error getting data, return the web page without any modifications
 				if (gridData.status === 'error') {
-					console.log('Error getting grid data', gridData);
+					// console.log('Error getting grid data', gridData);
 					return new Response(response.body, {
 						...response,
 						headers: {
@@ -277,9 +278,9 @@ export default {
 				// By default data is stored for 1 hour.
 				await saveDataToKv(env, country, JSON.stringify(gridData));
 			} else {
-				console.log('Using cached data for country', country);
+				// console.log('Using cached data for country', country);
 
-				console.log('Grid data:', gridData);
+				// console.log('Grid data:', gridData);
 				// Parse twice because the data appears to be double-stringified
 				gridData = await JSON.parse(gridData);
 			}
@@ -291,11 +292,24 @@ export default {
 			const powerPercentage = gridData.data.lowCarbonPercentage;
 
 				// Transform the response using the HTMLRewriter API, and set appropriate headers.
-				return await gridIntensityChanges(response, powerPercentage);
+			if (powerPercentage < lowCarbonBreakpoints.low) {
+				// console.log('Power percentage is low');
+				await setHighTheme(modifyHTML);
+				return await returnPage(response, modifyHTML);
+			} else if (powerPercentage < lowCarbonBreakpoints.medium) {
+				// console.log('Power percentage is medium');
+				await setMediumTheme(modifyHTML);
+				return await returnPage(response, modifyHTML);
+			} else if (powerPercentage < lowCarbonBreakpoints.high) {
+				// console.log('Power percentage is high');
+				await setLowTheme(modifyHTML);
+				return await returnPage(response, modifyHTML);
+			}
+
 		} catch (e) {
 
 			// If there's an error getting data, return the web page without any modifications
-			console.log('Error getting grid data', e);
+			// console.log('Error getting grid data', e);
 			return new Response(response.body, {
 				...response,
 				headers: {
