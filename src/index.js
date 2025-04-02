@@ -56,9 +56,25 @@ async function gridIntensityChanges(response, powerPercentage, selectedIntensity
 			element(element) {
 				const height = element.getAttribute('height');
 				const width = element.getAttribute('width');
+				const altText = element.getAttribute('alt') || '';
 
-				element.after(`<img src="https://branch.climateaction.tech//wp-content/themes/branch-theme/images/solid-placeholder.php?bg=ffdd9c&w=${width}&h=${height}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" height="${height}" width="${width}" />`, { html: true });
+				element.after(`<span style="width: ${width}px; height: ${height}px; display: inline-block;"><div class="carbon-alt">${altText}</div><div class="show-image">Show Image</div></span>`, { html: true });
 			}
+		});
+
+		modifyHTML = modifyHTML.on('body', {
+			element(element) {
+				element.append(`<script>
+					document.querySelectorAll('.show-image').forEach((el) => {
+						el.addEventListener('click', (e) => {
+							const parent = e.target.parentElement;
+							const img = parent.previousElementSibling;
+							const style = img.getAttribute('style') || '';
+							img.setAttribute('style', style + 'display: initial !important;');
+							parent.remove();
+						});
+					});</script>`, { html: true });
+			},
 		});
 
 		// Gallery images
