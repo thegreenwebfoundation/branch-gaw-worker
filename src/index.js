@@ -80,6 +80,8 @@ async function gridIntensityChanges(response, powerPercentage, selectedIntensity
 		// Gallery images
 		// modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon), .entry-content figure.wp-block-image:not(.no-carbon), .entry-content figure.wp-block-gallery figure:not(.no-carbon)', {
 
+		// https://branch-staging.climateaction.tech/wp-content/uploads/2024/04/xWholegrain-Digital-logo.png.pagespeed.ic.Cot5LJTbQ2.png
+		//
 
 	} else if ((powerPercentage && powerPercentage < lowCarbonBreakpoints.medium) || selectedIntensity === 'moderate') {
 		intensity = 'medium';
@@ -95,9 +97,9 @@ async function gridIntensityChanges(response, powerPercentage, selectedIntensity
 		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
 			element(element) {
 				const src = element.getAttribute('src');
-				src.replace(re, "$1/$2/low-res/");
+				element.setAttribute('src', src.replace(re, "$1/$2/low-res/"));
 				const srcset = element.getAttribute('srcset');
-				srcset.replaceAll(re, "$1/$2/low-res/");
+				element.setAttribute('srcset', srcset.replaceAll(re, "$1/$2/low-res/"));
 				const style = element.getAttribute('style') || '';
 				element.setAttribute('style', style + 'display: initial !important;');
 			}
