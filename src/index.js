@@ -2,9 +2,10 @@ import { PowerBreakdown } from '@greenweb/grid-aware-websites';
 import { getLocation, saveDataToKv, fetchDataFromKv } from '@greenweb/gaw-plugin-cloudflare-workers';
 
 // TODO: Grid-aware behaviour for gallery images
+// TODO: Grid-aware behaviour for images that are links
 
 // What are the thresholds for the grid power breakdown?
-// We;re using the low-carbon percentage, so the higher the percentage, the cleaner the grid.
+// We're using the low-carbon percentage from Electricity Maps, so the higher the percentage the cleaner the grid.
 const lowCarbonBreakpoints = {
 	'low': 50,
 	'medium': 70,
@@ -14,6 +15,8 @@ const lowCarbonBreakpoints = {
 let intensity = 'unknown';
 let logo = 'unknown';
 
+// This function creates the select element for the grid intensity switcher
+// It takes the selected intensity as an argument and returns a string of HTML
 function createSelect(selectedIntensity) {
 	const options = ['live', 'high', 'moderate', 'low'];
 	let selectOptions = '<select id="carbon-switcher-toggle" class="select-list__linked select-css" style="text-decoration: underline; text-underline-offset: 2px;">';
@@ -30,9 +33,16 @@ function createSelect(selectedIntensity) {
 	return selectOptions;
 }
 
+// This function sets the theme for the high intensity
 async function setHighTheme(modifyHTML) {
+
+		// Set the logo and intensity for the high theme
 		intensity = 'high';
 		logo = 'orange';
+
+		// The rest of the code uses HTMLRewriter to modify the HTML response for the high theme
+
+		// Add the CSS variables for the high theme to the HTML element
 		modifyHTML = modifyHTML.on('html', {
 			element(element) {
 				const style = element.getAttribute('style') || '';
@@ -40,13 +50,15 @@ async function setHighTheme(modifyHTML) {
 			},
 		});
 
-		// Regular images, not in gallery
+		// Set the figure elements on the page to have a relative position that will allow them to be replaced with the high theme overlay
 		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon), .entry-content figure.wp-block-image:not(.no-carbon), .entry-content figure.wp-block-gallery figure:not(.no-carbon)', {
 			element(element) {
 				element.setAttribute('style', 'position: relative;');
 			}
 		});
-		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
+
+		// Set the src and srcset attributes for the images on the page based on the CSS selectors specified
+		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
 			element(element) {
 				const height = element.getAttribute('height');
 				const width = element.getAttribute('width');
@@ -56,6 +68,7 @@ async function setHighTheme(modifyHTML) {
 			}
 		});
 
+		// Add a script to the end of the body that removes the overlay span when the "Show Image" link is clicked.
 		modifyHTML = modifyHTML.on('body', {
 			element(element) {
 				element.append(`<script>
@@ -72,7 +85,16 @@ async function setHighTheme(modifyHTML) {
 		});
 
 		// Gallery images
-		// modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon), .entry-content figure.wp-block-image:not(.no-carbon), .entry-content figure.wp-block-gallery figure:not(.no-carbon)', {
+		// modifyHTML = modifyHTML.on('.entry-content figure.wp-block-gallery figure:not(.no-carbon)', {
+		// 	element(element) {
+		// 		const height = element.getAttribute('height');
+		// 		const width = element.getAttribute('width');
+		// 		const altText = element.getAttribute('alt') || '';
+
+		// 		element.after(`<span style="width: ${width}px; height: ${height}px; display: inline-block;"><div class="carbon-alt">${altText}</div><div class="show-image">Show Image</div></span>`, { html: true });
+		// 	}
+		// });
+
 
 		// https://branch-staging.climateaction.tech/wp-content/uploads/2024/04/xWholegrain-Digital-logo.png.pagespeed.ic.Cot5LJTbQ2.png
 		//
@@ -81,9 +103,17 @@ async function setHighTheme(modifyHTML) {
 }
 
 async function setMediumTheme(modifyHTML) {
-	intensity = 'medium';
+
+		// Set the logo and intensity for the medium theme
+		intensity = 'medium';
 		logo = 'blue';
+
+		// The rest of the code uses HTMLRewriter to modify the HTML response for the medium theme
+
+		// Set the regex to match the image URLs
 		const re = /(\d{4})\/(\d{2})\//gi;
+
+		// Add the CSS variables for the medium theme to the HTML element
 		modifyHTML = modifyHTML.on('html', {
 			element(element) {
 				const style = element.getAttribute('style') || '';
@@ -91,6 +121,10 @@ async function setMediumTheme(modifyHTML) {
 			},
 		});
 
+		// Replace the src and srcset attributes for the images on the page based on the CSS selectors specified
+		// The regex is used to match the image URLs and replace them with the low-res version
+		// The srcset attribute is also modified to include the low-res version of the image
+		// The style attribute is set to display the image
 		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
 			element(element) {
 				const src = element.getAttribute('src');
@@ -102,6 +136,9 @@ async function setMediumTheme(modifyHTML) {
 			}
 		});
 
+		// Replace the srcset attribute for the picture elements on the page based on the CSS selectors specified
+		// The regex is used to match the image URLs and replace them with the low-res version
+		// The srcset attribute is modified to include the low-res version of the image
 		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) picture source, .entry-content figure.wp-block-image:not(.no-carbon) picture source, .entry-content figure.wp-block-gallery figure:not(.no-carbon) picture source', {
 			element(element) {
 				const srcset = element.getAttribute('srcset');
@@ -113,9 +150,13 @@ async function setMediumTheme(modifyHTML) {
 }
 
 async function setLowTheme(modifyHTML) {
-	intensity = 'low';
+
+		// Set the logo and intensity for the low theme
+		intensity = 'low';
 		logo = 'green';
 
+		// The rest of the code uses HTMLRewriter to modify the HTML response for the low theme
+		// Add the CSS variables for the low theme to the HTML element
 		modifyHTML = modifyHTML.on('html', {
 			element(element) {
 				const style = element.getAttribute('style') || '';
@@ -123,6 +164,7 @@ async function setLowTheme(modifyHTML) {
 			},
 		});
 
+		// Update the style attribute for the figure elements on the page so that images are shown
 		modifyHTML = modifyHTML.on('.entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img', {
 			element(element) {
 				const style = element.getAttribute('style') || '';
@@ -133,14 +175,20 @@ async function setLowTheme(modifyHTML) {
 		return modifyHTML;
 }
 
+
+// This function takes the response and modifies the HTML using the HTMLRewriter API before returning the response to the client
+// It replaces the logo, intensity, and adds a select element for the grid intensity switcher
+// It also adds a script to handle the change event for the select element and set a cookie with the selected intensity
 async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
+
+	// Set the logo based on the intensity
 	modifyHTML = modifyHTML.on('.logo img', {
 		element(element) {
 			element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_' + logo + '-02.svg');
 		}
 	})
 
-
+	// Add a class to the body element based on the intensity
 	modifyHTML = modifyHTML.on('body', {
 		element(element) {
 			const classes = element.getAttribute('class') || '';
@@ -148,12 +196,14 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 		},
 	});
 
+	// Update the content of the intensity element with the current intensity
 	modifyHTML = modifyHTML.on('.intensity', {
 		element(element) {
 			element.setInnerContent(intensity);
 		}
 	});
 
+	// Remove the script tag for the intensity toggle on the page
 	modifyHTML = modifyHTML.on('#intensity-toggle-js', {
 		element(element) {
 			// element.before(`<script>function setWithExpiry(key,value,ttl){const now=new Date();now.setTime(now.getTime()+ttl);document.cookie=key+"="+value+";expires="+now.toUTCString()+";path=/"}function getWithExpiry(key){return}</script>`, { html: true });
@@ -161,12 +211,16 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 		}
 	});
 
+	// Replace the carbon intensity switcher toggle with a select element that allows the user to select the grid intensity
+	// The select element is created using the createSelect function and the selected intensity is passed as an argument
 	modifyHTML = modifyHTML.on('#carbon-switcher-toggle', {
 		element(element) {
 			element.replace(createSelect(selectedIntensity), { html: true });
 		}
 	});
 
+	// Add a script to handle the change event for the select element
+	// When the user selects a new intensity, a cookie is set with the selected intensity and the page is reloaded
 	modifyHTML = modifyHTML.on('body', {
 		element(element) {
 			element.append(`<script>
@@ -181,6 +235,7 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 		}
 	});
 
+	// Return the modified response with the appropriate headers
 	return new Response(modifyHTML.transform(response).body, {
 		...response,
 		headers: {
@@ -220,6 +275,8 @@ export default {
 
 			let modifyHTML = new HTMLRewriter();
 
+			// Check if the user has selected a grid intensity using the cookie
+			// If the cookie exists, then we set the selected intensity to the value of the cookie
 			if (cookie && cookie.includes('selected-intensity=low')) {
 				// console.log('Grid-aware feature is forced to low');
 				await setLowTheme(modifyHTML);
@@ -234,8 +291,7 @@ export default {
 				return await returnPage(response, modifyHTML, 'high');
 			}
 
-
-			// If the content type is HTML, we get the country the request came from
+			// If the user has not selected a grid intensity, then we get the location of the request
 			const location = await getLocation(request);
 			const { country } = location;
 
@@ -247,7 +303,7 @@ export default {
 				});
 			}
 
-			// Check we have have cached grid data for the country
+			// Check if we have have cached grid data for the country
 			let gridData = await fetchDataFromKv(env, country);
 
 			// If no cached data, fetch it using the PowerBreakdown class
