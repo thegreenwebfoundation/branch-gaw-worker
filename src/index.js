@@ -254,7 +254,7 @@ export default {
 		const contentType = response.headers.get('content-type');
 
 		// If the content is not HTML, then return the response without any changes.
-		if (!contentType || !contentType.includes('text/html') || url.includes('/wp-content/') || url.includes('/wp-includes/') || url.includes('/wp-admin/') || url.includes('/wp-json/')) {
+		if (!contentType || !contentType.includes('text/html') || url.includes('/wp-content/') || url.includes('/wp-includes/') || url.includes('/wp-admin/') || url.includes('/wp-login.php') || url.includes('/wp-json/')) {
 			// console.log('Content type is not HTML');
 			return new Response(response.body, {
 				...response,
