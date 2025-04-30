@@ -235,6 +235,21 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 		}
 	});
 
+	// TEMP: Image & CSS hack
+	// modifyHTML = modifyHTML.on('img[src$=".svg"', {
+	// 	element(element) {
+	// 		const src = element.getAttribute('src');
+	// 		element.setAttribute('src', src.replace('branch-staging.climateaction.tech', 'branch.climateaction.tech'));
+	// 	}
+	// });
+
+	modifyHTML = modifyHTML.on('head', {
+		element(element) {
+			element.prepend('<link rel="stylesheet" id="branch-style-css" href="https://branch-staging.climateaction.tech/wp-content/themes/branch-theme/style.css?ver=1742233564" media="all">', { html: true });
+		}
+	});
+
+
 	// Return the modified response with the appropriate headers
 	return new Response(modifyHTML.transform(response).body, {
 		...response,
