@@ -264,16 +264,26 @@ export default {
 	// First fetch the request
 	async fetch(request, env, ctx) {
 		const url = request.url;
+
+		// If the URL is a path we ant to skip, then just return the request
+		if (
+			url.includes('/wp-content') ||
+			url.includes('/wp-includes') ||
+			url.includes('/wp-admin') ||
+			url.includes('/wp-login.php') ||
+			url.includes('/wp-json')
+		) {
+			return fetch(request);
+		}
+
 		const response = await fetch(request.url);
 		// Then check if the request content type is HTML.
 		const contentType = response.headers.get('content-type');
 
 		// If the content is not HTML, then return the response without any changes.
-		if (!contentType || !contentType.includes('text/html') || url.includes('/wp-content/') || url.includes('/wp-includes/') || url.includes('/wp-admin/') || url.includes('/wp-login.php') || url.includes('/wp-json/')) {
+		if (!contentType || !contentType.includes('text/html')) {
 			// console.log('Content type is not HTML');
-			return new Response(response.body, {
-				...response,
-			});
+			return fetch(request);
 		}
 
 		try {
