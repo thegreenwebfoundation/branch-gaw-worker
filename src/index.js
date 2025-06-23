@@ -248,7 +248,37 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 				document.getElementById('carbon-switcher-toggle').addEventListener('change', function(e) {
 					setWithExpiry('selected-intensity', e.target.value);
 					location.reload();
-				});</script>`,
+				});</script>
+
+				<script>
+				async function main() {
+
+							const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+							const tocLink = document.querySelector('.toc-link');
+							const blackOut = document.querySelector('.blackout');
+							const toc = document.querySelector('.table-of-contents');
+							let tocActive = 0;
+
+							if ( tocLink !== null ) {
+								tocLink.addEventListener( "click", function(event) {
+									event.preventDefault();
+									if ( 1 == tocActive ) {
+										blackOut.classList.add('blackout-fading');
+										setTimeout( function() {
+											blackOut.classList.remove('blackout-active');
+											blackOut.classList.remove('blackout-fading');
+											tocActive = 0;
+										}, 500);
+									} else {
+										blackOut.classList.add('blackout-active');
+										tocActive = 1;
+									}
+									toc.classList.toggle('table-of-contents-active');
+								}, false);
+							}
+						}
+						main()
+						</script>`,
 				{ html: true },
 			);
 		},
