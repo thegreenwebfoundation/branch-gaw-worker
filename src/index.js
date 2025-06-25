@@ -220,12 +220,12 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 	});
 
 	// Remove the script tag for the intensity toggle on the page
-	modifyHTML = modifyHTML.on('#intensity-toggle-js', {
-		element(element) {
-			// element.before(`<script>function setWithExpiry(key,value,ttl){const now=new Date();now.setTime(now.getTime()+ttl);document.cookie=key+"="+value+";expires="+now.toUTCString()+";path=/"}function getWithExpiry(key){return}</script>`, { html: true });
-			element.remove();
-		},
-	});
+	// modifyHTML = modifyHTML.on('#intensity-toggle-js', {
+	// 	element(element) {
+	// 		// element.before(`<script>function setWithExpiry(key,value,ttl){const now=new Date();now.setTime(now.getTime()+ttl);document.cookie=key+"="+value+";expires="+now.toUTCString()+";path=/"}function getWithExpiry(key){return}</script>`, { html: true });
+	// 		element.remove();
+	// 	},
+	// });
 
 	// Replace the carbon intensity switcher toggle with a select element that allows the user to select the grid intensity
 	// The select element is created using the createSelect function and the selected intensity is passed as an argument
@@ -292,14 +292,14 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 	// 	}
 	// });
 
-	modifyHTML = modifyHTML.on('head', {
-		element(element) {
-			element.prepend(
-				'<link rel="stylesheet" id="branch-style-css" href="https://branch-staging.climateaction.tech/wp-content/themes/branch-theme/style.css?ver=1742233564" media="all">',
-				{ html: true },
-			);
-		},
-	});
+	// modifyHTML = modifyHTML.on('head', {
+	// 	element(element) {
+	// 		element.prepend(
+	// 			'<link rel="stylesheet" id="branch-style-css" href="https://branch-staging.climateaction.tech/wp-content/themes/branch-theme/style.css?ver=1742233564" media="all">',
+	// 			{ html: true },
+	// 		);
+	// 	},
+	// });
 
 	// Return the modified response with the appropriate headers
 	return new Response(modifyHTML.transform(response).body, {
