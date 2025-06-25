@@ -314,6 +314,22 @@ async function returnPage(response, modifyHTML, selectedIntensity = 'live') {
 export default {
 	// First fetch the request
 	async fetch(request, env, ctx) {
+		const devMode = env.WORKER_MODE === 'dev' ? true : false;
+
+		let newRequest = null;
+		if (devMode) {
+			console.log('devMode is enabled');
+			const url = new URL(request.url);
+			url.hostname = 'localhost';
+			url.port = '8080';
+			url.protocol = 'http';
+			newRequest = new Request(url.toString(), request);
+		}
+
+		if (newRequest) {
+			request = newRequest;
+		}
+
 		const url = request.url;
 
 		// If the URL is a path we ant to skip, then just return the request
