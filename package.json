@@ -1,20 +1,20 @@
 {
-  "name": "gwf-gaw-worker",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "test": "vitest"
-  },
-  "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.7.4",
-    "vitest": "3.0.7",
-    "wrangler": "^4.0.0"
-  },
-  "dependencies": {
-    "@greenweb/gaw-plugin-cloudflare-workers": "^0.2.1",
-    "@greenweb/grid-aware-websites": "^0.3.0"
-  }
+	"name": "gwf-gaw-worker",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"test": "vitest"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.7.4",
+		"vitest": "3.0.7",
+		"wrangler": "^4.0.0"
+	},
+	"dependencies": {
+		"@greenweb/gaw-plugin-cloudflare-workers": "^0.5.0-0",
+		"@greenweb/grid-aware-websites": "^0.3.0"
+	}
 }
