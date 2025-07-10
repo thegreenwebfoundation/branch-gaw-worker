@@ -19,8 +19,9 @@
 	"kv_namespaces": [
 		{
 			"binding": "GAW_DATA_KV",
-			"id": "ca924e15062e4658874134b121571dc7"
-		  }
+			"id": "ca924e15062e4658874134b121571dc7",
+			"preview_id": "ae13ca9a1cfe4063b2c6f68e43f4f65f"
+		}
 	]
 	/**
 	 * Smart Placement
