@@ -3,6 +3,14 @@ import auto from '@greenweb/gaw-plugin-cloudflare-workers';
 // Set the regex to match the image URLs
 const moderateImageRegex = /(\d{4})\/(\d{2})\//gi;
 
+// Regex to find YouTube video ID
+const ytIdRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+
+function getYoutubeID(url) {
+	var match = url.match(ytIdRegex);
+	return match && match[7].length == 11 ? match[7] : false;
+}
+
 export default {
 	async fetch(request, env, ctx) {
 		return auto(request, env, ctx, {
@@ -33,6 +41,31 @@ export default {
 					.on('.logo img', {
 						element(element) {
 							element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_green-02.svg');
+						},
+					})
+					.on('iframe[src*="youtube"]', {
+						element(element) {
+							const src = element.getAttribute('src');
+							const id = getYoutubeID(src);
+							const className = element.getAttribute('class');
+							const params = new URL(src).searchParams.toString();
+
+							const width = element.getAttribute('width') || '100%';
+							const height = element.getAttribute('height') || 'auto';
+
+							element.replace(
+								`<div style="width: ${width}px; height: ${height}px; margin-inline: auto;"><lite-youtube class="${className || ''}" videoid="${id}" nocookie params='${params}'> </lite-youtube></div>`,
+								{
+									html: true,
+								},
+							);
+
+							element.append(
+								`<script type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/lite-youtube@1.3.1/lite-youtube.js"></script>`,
+								{
+									html: true,
+								},
+							);
 						},
 					}),
 				moderate: new HTMLRewriter()
@@ -66,6 +99,31 @@ export default {
 					.on('.logo img', {
 						element(element) {
 							element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_blue-02.svg');
+						},
+					})
+					.on('iframe[src*="youtube"]', {
+						element(element) {
+							const src = element.getAttribute('src');
+							const id = getYoutubeID(src);
+							const className = element.getAttribute('class');
+							const params = new URL(src).searchParams.toString();
+
+							const width = element.getAttribute('width') || '100%';
+							const height = element.getAttribute('height') || 'auto';
+
+							element.replace(
+								`<div style="width: ${width}px; height: ${height}px; margin-inline: auto;"><lite-youtube class="${className || ''}" videoid="${id}" nocookie params='${params}'> </lite-youtube></div>`,
+								{
+									html: true,
+								},
+							);
+
+							element.append(
+								`<script type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/lite-youtube@1.3.1/lite-youtube.js"></script>`,
+								{
+									html: true,
+								},
+							);
 						},
 					}),
 				high: new HTMLRewriter()
@@ -117,6 +175,62 @@ export default {
 					.on('.logo img', {
 						element(element) {
 							element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_orange-02.svg');
+						},
+					})
+					.on('iframe[src*="youtube"]', {
+						element(element) {
+							const src = element.getAttribute('src');
+							const id = getYoutubeID(src);
+							const title = element.getAttribute('title') || '';
+
+							const width = element.getAttribute('width') || '100%';
+							const height = element.getAttribute('height') || 'auto';
+
+							element.replace(
+								`<style>.lite-youtube-fallback {
+									aspect-ratio: 16 / 9; /* matches YouTube player */
+									display: flex;
+									justify-content: center;
+									align-items: center;
+									flex-direction: column;
+									gap: 1em;
+									padding: 1em;
+									background-color: var(--bg-colour-dark);
+									cursor: pointer;
+									}
+
+									.lite-youtube-fallback, .lite-youtube-fallback:visited{
+										color: currentColor;
+										text-decoration: underline;
+									}
+
+									.lite-youtube-fallback:hover {
+										text-decoration: none;
+									}
+									</style><div style="width: ${width}px; height: ${height}px; margin-inline: auto;"><a class="lite-youtube-fallback" href="https://www.youtube.com/watch?v=${id}">Watch on YouTube: <br />"${title}"</a></div>`,
+								{
+									html: true,
+								},
+							);
+
+							element.append(
+								`<script type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/lite-youtube@1.3.1/lite-youtube.js"></script>`,
+								{
+									html: true,
+								},
+							);
+						},
+					})
+					.on('.pdf-embed-download', {
+						element(element) {
+							const href = element.getAttribute('href');
+
+							element.replace(`<a href="${href}" style="color: currentColor; padding: 2.5rem;">Download the PDF</a>`, { html: true });
+						},
+					})
+					.on('.pdfemb-viewer', {
+						element(element) {
+							element.remove();
 						},
 					}),
 			},
