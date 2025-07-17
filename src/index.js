@@ -38,11 +38,6 @@ export default {
 							},
 						},
 					)
-					.on('.logo img', {
-						element(element) {
-							element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_green-02.svg');
-						},
-					})
 					.on('iframe[src*="youtube"]', {
 						element(element) {
 							const src = element.getAttribute('src');
@@ -96,11 +91,6 @@ export default {
 							},
 						},
 					)
-					.on('.logo img', {
-						element(element) {
-							element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_blue-02.svg');
-						},
-					})
 					.on('iframe[src*="youtube"]', {
 						element(element) {
 							const src = element.getAttribute('src');
@@ -172,11 +162,6 @@ export default {
 							},
 						},
 					)
-					.on('.logo img', {
-						element(element) {
-							element.setAttribute('src', 'https://branch.climateaction.tech/wp-content/themes/branch-theme/images/branch_orange-02.svg');
-						},
-					})
 					.on('iframe[src*="youtube"]', {
 						element(element) {
 							const src = element.getAttribute('src');
