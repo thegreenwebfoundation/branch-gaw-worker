@@ -21,12 +21,24 @@ export default {
 			kvCacheData: true,
 			kvCachePage: false,
 			devMode: false,
-			infoBarTarget: '#gaw-data-bar',
+			infoBar: {
+				target: '#gaw-data-bar',
+			},
+			userOptIn: true,
 			htmlChanges: {
 				low: new HTMLRewriter()
 					.on('body', {
 						element: (element) => {
 							element.setAttribute('data-gaw-mode', 'low');
+							element.append(
+								`<script type="module">const infoBar = document.querySelector('gaw-info-bar');
+const shadowRoot = infoBar.shadowRoot
+const toggle = shadowRoot.querySelector('input[type="checkbox"]')
+toggle.addEventListener("change", () => {
+    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
+})</script>`,
+								{ html: true },
+							);
 						},
 					})
 					.on(
@@ -67,6 +79,15 @@ export default {
 					.on('body', {
 						element: (element) => {
 							element.setAttribute('data-gaw-mode', 'moderate');
+							element.append(
+								`<script type="module">const infoBar = document.querySelector('gaw-info-bar');
+const shadowRoot = infoBar.shadowRoot
+const toggle = shadowRoot.querySelector('input[type="checkbox"]')
+toggle.addEventListener("change", () => {
+    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
+})</script>`,
+								{ html: true },
+							);
 						},
 					})
 					.on(
@@ -120,6 +141,16 @@ export default {
 					.on('body', {
 						element: (element) => {
 							element.setAttribute('data-gaw-mode', 'high');
+
+							element.append(
+								`<script type="module">const infoBar = document.querySelector('gaw-info-bar');
+const shadowRoot = infoBar.shadowRoot
+const toggle = shadowRoot.querySelector('input[type="checkbox"]')
+toggle.addEventListener("change", () => {
+    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
+})</script>`,
+								{ html: true },
+							);
 
 							// Code to trigger the image being shown
 							element.append(
