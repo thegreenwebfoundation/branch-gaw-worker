@@ -14,6 +14,10 @@
 		{
 			"pattern": "branch-staging.climateaction.tech/*",
 			"zone_name": "climateaction.tech"
+		},
+		{
+			"pattern": "branch.climateaction.tech/*",
+			"zone_name": "climateaction.tech"
 		}
 	],
 	"kv_namespaces": [
