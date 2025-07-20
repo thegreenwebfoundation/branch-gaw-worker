@@ -31,12 +31,19 @@ export default {
 						element: (element) => {
 							element.setAttribute('data-gaw-mode', 'low');
 							element.append(
-								`<script type="module">const infoBar = document.querySelector('gaw-info-bar');
-const shadowRoot = infoBar.shadowRoot
-const toggle = shadowRoot.querySelector('input[type="checkbox"]')
-toggle.addEventListener("change", () => {
-    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
-})</script>`,
+								`<script type="module">
+									const infoBar = document.querySelector('gaw-info-bar');
+									const shadowRoot = infoBar.shadowRoot
+									const toggle = shadowRoot.querySelector('input[type="checkbox"]')
+									toggle.addEventListener("change", () => {
+									    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
+									})
+
+									const infoIcon = shadowRoot.querySelector('.popover-wrapper > button')
+									infoIcon.addEventListener('click', () => {
+										cabin?.event("GAW info clicked")
+									});
+								</script>`,
 								{ html: true },
 							);
 						},
@@ -80,12 +87,19 @@ toggle.addEventListener("change", () => {
 						element: (element) => {
 							element.setAttribute('data-gaw-mode', 'moderate');
 							element.append(
-								`<script type="module">const infoBar = document.querySelector('gaw-info-bar');
-const shadowRoot = infoBar.shadowRoot
-const toggle = shadowRoot.querySelector('input[type="checkbox"]')
-toggle.addEventListener("change", () => {
-    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
-})</script>`,
+								`<script type="module">
+									const infoBar = document.querySelector('gaw-info-bar');
+									const shadowRoot = infoBar.shadowRoot
+									const toggle = shadowRoot.querySelector('input[type="checkbox"]')
+									toggle.addEventListener("change", () => {
+									    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
+									})
+
+									const infoIcon = shadowRoot.querySelector('.popover-wrapper > button')
+									infoIcon.addEventListener('click', () => {
+										cabin?.event("GAW info clicked")
+									});
+								</script>`,
 								{ html: true },
 							);
 						},
@@ -143,12 +157,19 @@ toggle.addEventListener("change", () => {
 							element.setAttribute('data-gaw-mode', 'high');
 
 							element.append(
-								`<script type="module">const infoBar = document.querySelector('gaw-info-bar');
-const shadowRoot = infoBar.shadowRoot
-const toggle = shadowRoot.querySelector('input[type="checkbox"]')
-toggle.addEventListener("change", () => {
-    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
-})</script>`,
+								`<script type="module">
+									const infoBar = document.querySelector('gaw-info-bar');
+									const shadowRoot = infoBar.shadowRoot
+									const toggle = shadowRoot.querySelector('input[type="checkbox"]')
+									toggle.addEventListener("change", () => {
+									    toggle.checked ? cabin?.event("GAW opt-in") : cabin?.event("GAW opt-out")
+									})
+
+									const infoIcon = shadowRoot.querySelector('.popover-wrapper > button')
+									infoIcon.addEventListener('click', () => {
+										cabin?.event("GAW info clicked")
+									});
+								</script>`,
 								{ html: true },
 							);
 
