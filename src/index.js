@@ -133,6 +133,15 @@ export default {
 										const img = parent.previousElementSibling;
 										const style = img.getAttribute('style') || '';
 										img.setAttribute('style', style + 'display: initial !important;');
+
+										const src = img.getAttribute('data-full-src');
+										const srcset = img.getAttribute('data-full-srcset');
+
+										img.setAttribute('src', src);
+										img.setAttribute('srcset', srcset);
+
+										img.setAttribute('data-full-src', '');
+										img.setAttribute('data-full-srcset', '');
 										parent.remove();
 									});
 								});</script>`,
@@ -158,15 +167,18 @@ export default {
 								const src = element.getAttribute('src');
 								const srcset = element.getAttribute('srcset');
 
-								// element.setAttribute('data-full-src', src);
-								// element.setAttribute('data-full-srcset', srcset);
+								element.setAttribute('data-full-src', src);
+								element.setAttribute('data-full-srcset', srcset);
 								element.setAttribute('src', src.replace(moderateImageRegex, '$1/$2/low-res/'));
 								element.setAttribute('srcset', srcset.replaceAll(moderateImageRegex, '$1/$2/low-res/'));
 
 								element.setAttribute('style', 'display: block;');
 
 								element.after(
-									`<span style="width: 100%; height: 100%; display: inline-block; z-index: 1; top: 0; left: 0; position: absolute; background-color: var(--bg-colour-dark);"><div class="carbon-alt">${altText}</div><div class="show-image">Show low-res image</div></span>`,
+									`<span style="width: 100%; height: 100%; display: inline-flex; z-index: 1; top: 0; left: 0; position: absolute; background-color: var(--bg-colour-dark);flex-direction: column;align-items: center;justify-content: space-evenly;padding: 0.5rem;">
+									<div class="carbon-alt" style="position: relative; transform: none; top: 0; left: 0;">${altText}</div>
+									<div class="show-image" style="position: relative; transform: none; bottom: 0; left: 0;">Show image</div>
+									</span>`,
 									{ html: true },
 								);
 							},
