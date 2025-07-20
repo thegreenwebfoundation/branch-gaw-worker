@@ -201,14 +201,16 @@ export default {
 						'.entry-content figure.wp-block-image:not(.no-carbon) img, .entry-content .wp-block-image figure:not(.no-carbon) img, .entry-content figure.wp-block-gallery figure:not(.no-carbon) img',
 						{
 							element(element) {
-								const height = element.getAttribute('height');
-								const width = element.getAttribute('width');
+								// const height = element.getAttribute('height');
+								// const width = element.getAttribute('width');
 								const altText = element.getAttribute('alt') || '';
+								const src = element.getAttribute('src');
+								const srcset = element.getAttribute('srcset');
 
-								element.setAttribute('style', 'display: none;');
+								element.setAttribute('style', 'display: block;');
 
 								element.after(
-									`<span style="width: ${width}px; height: ${height}px; display: inline-block;"><div class="carbon-alt">${altText}</div><div class="show-image">Show Image</div></span>`,
+									`<span style="width: 100%; height: 100%; display: inline-block; z-index: 1; top: 0; left: 0; position: absolute; background-color: var(--bg-colour-dark);"><div class="carbon-alt">${altText}</div><div class="show-image">Show Image</div></span>`,
 									{ html: true },
 								);
 							},
