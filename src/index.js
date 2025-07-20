@@ -193,6 +193,16 @@ toggle.addEventListener("change", () => {
 							},
 						},
 					)
+					.on('link[href*="fonts.css"]', {
+						element(element) {
+							element.remove();
+						},
+					})
+					.on('link[rel="preload"][as="font"]', {
+						element(element) {
+							element.remove();
+						},
+					})
 					.on('iframe[src*="youtube"]', {
 						element(element) {
 							const src = element.getAttribute('src');
