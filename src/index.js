@@ -14,7 +14,7 @@ function getYoutubeID(url) {
 export default {
 	async fetch(request, env, ctx) {
 		return auto(request, env, ctx, {
-			debug: 'full',
+			debug: 'headers',
 			contentType: ['text/html', 'text/plain'],
 			gawDataApiKey: env.EMAPS_API_KEY,
 			ignoreRoutes: ['/wp-content', '/wp-admin', '/wp-login.php', '/wp-includes', '/wp-json'],
