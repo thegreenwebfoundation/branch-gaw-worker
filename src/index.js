@@ -77,9 +77,9 @@ export default {
 						{
 							element(element) {
 								const src = element.getAttribute('src');
-								element.setAttribute('src', src.replace(moderateImageRegex, '$1/$2/low-res/'));
+								element.setAttribute('src', src?.replace(moderateImageRegex, '$1/$2/low-res/'));
 								const srcset = element.getAttribute('srcset');
-								element.setAttribute('srcset', srcset.replaceAll(moderateImageRegex, '$1/$2/low-res/'));
+								element.setAttribute('srcset', srcset?.replaceAll(moderateImageRegex, '$1/$2/low-res/'));
 								const style = element.getAttribute('style') || '';
 								element.setAttribute('style', style + 'display: initial !important;');
 							},
@@ -90,7 +90,7 @@ export default {
 						{
 							element(element) {
 								const srcset = element.getAttribute('srcset');
-								srcset.replaceAll(moderateImageRegex, '$1/$2/low-res/');
+								srcset?.replaceAll(moderateImageRegex, '$1/$2/low-res/');
 							},
 						},
 					)
@@ -169,8 +169,8 @@ export default {
 
 								element.setAttribute('data-full-src', src);
 								element.setAttribute('data-full-srcset', srcset);
-								element.setAttribute('src', src.replace(moderateImageRegex, '$1/$2/low-res/'));
-								element.setAttribute('srcset', srcset.replaceAll(moderateImageRegex, '$1/$2/low-res/'));
+								element.setAttribute('src', src?.replace(moderateImageRegex, '$1/$2/low-res/'));
+								element.setAttribute('srcset', srcset?.replaceAll(moderateImageRegex, '$1/$2/low-res/'));
 
 								element.setAttribute('style', 'display: block;');
 
