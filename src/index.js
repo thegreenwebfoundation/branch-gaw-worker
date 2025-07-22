@@ -23,6 +23,7 @@ export default {
 			devMode: false,
 			infoBar: {
 				target: '#gaw-data-bar',
+				learnMoreLink: 'https://branch.climateaction.tech/issues/issue-9/designing-a-grid-aware-branch/',
 			},
 			userOptIn: true,
 			htmlChanges: {
